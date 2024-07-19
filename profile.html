@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Pengguna - bacaquran</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f4f6;
+            padding: 20px;
+        }
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-container h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .profile-item {
+            margin-bottom: 10px;
+        }
+        .profile-link {
+            display: block;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .profile-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h2>Profil Pengguna</h2>
+        <div class="profile-item">
+            <strong>Nama Pengguna:</strong> John Doe
+        </div>
+        <div class="profile-item">
+            <strong>Surat dan Ayat Terakhir di Checkpoint:</strong> Surat 2, Ayat 30
+            <a href="#" onclick="goToCheckpoint()">Buka</a>
+        </div>
+        <div class="profile-item">
+            <strong>Jumlah Ayat Favorit:</strong> 5 ayat
+            <a href="favorit.html">Lihat Favorit</a>
+        </div>
+        <a href="index.html" class="profile-link">Kembali ke Beranda</a>
+    </div>
+
+    <script>
+        function goToCheckpoint() {
+            // Implementasi untuk menuju ke ayat checkpoint
+            alert('Implementasi untuk menuju ke ayat checkpoint dapat dilakukan di sini');
+            // Contoh penggunaan window.location untuk navigasi ke halaman detail surah dengan checkpoint
+            // window.location.href = 'detail-surah.html?number=2';
+        }
+    </script>
+</body>
+</html>
