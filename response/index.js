@@ -1,4 +1,4 @@
-const responseList = (data) => {
+const responseList = (data, surahFavorites) => {
   return data.map((e) => {
     return {
       number: e.nomor,
@@ -7,11 +7,12 @@ const responseList = (data) => {
       englishNameTranslation: e.arti,
       numberOfAyahs: e.jumlahAyat,
       revelationType: e.tempatTurun,
+      isFavorite: surahFavorites.some((fav) => fav.surah_id == e.nomor),
     };
   });
 };
 
-const responseListDetail = (data) => {
+const responseListDetail = (data, ayah) => {
   return {
     number: data.nomor,
     name: data.nama,
@@ -19,8 +20,18 @@ const responseListDetail = (data) => {
     englishNameTranslation: data.arti,
     numberOfAyahs: data.jumlahAyat,
     revelationType: data.tempatTurun,
-    ayahs: data.ayat,
+    ayahs: ayah,
   };
 };
 
-export { responseList, responseListDetail };
+const responseListAyat = (ayat, favorites, checkpoints) => {
+  return ayat.map((e) => {
+    e.isFavorite = favorites.some((fav) => fav.ayah_id == e.nomorAyat);
+    e.isCheckpoints = checkpoints.some(
+      (checks) => checks.ayah_id == e.nomorAyat
+    );
+    return e;
+  });
+};
+
+export { responseList, responseListAyat, responseListDetail };
