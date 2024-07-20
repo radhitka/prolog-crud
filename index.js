@@ -11,7 +11,7 @@ import {
 import 'dotenv/config';
 import generateAuthToken from './config/jwt.js';
 import db from './database/index.js';
-import { loginMiddleware } from './middleware/index.js';
+import { loginMiddleware, requiredMiddleware } from './middleware/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -121,35 +121,6 @@ app.post('/login', async function (req, res) {
 
 app.use(loginMiddleware);
 
-app.get('/me', async function (req, res) {
-  try {
-    const { user_id } = req.user;
-
-    const sqlUser = 'SELECT * FROM users WHERE id = ? LIMIT 1';
-
-    const [resultUser] = await db.query(sqlUser, [user_id]);
-
-    const data = resultUser.map((e) => {
-      return {
-        id: e.id,
-        name: e.name,
-        username: e.username,
-      };
-    });
-
-    res.status(200).json({
-      code: 200,
-      message: 'Success',
-      data: data[0],
-    });
-  } catch (err) {
-    res.status(500).json({
-      code: 500,
-      message: err.message,
-    });
-  }
-});
-
 app.get('/surah', async function (req, res) {
   try {
     const { user_id } = req.user;
@@ -207,6 +178,37 @@ app.get('/surah/:nomor', async function (req, res) {
       code: body.code,
       message: body.message,
       data: responseListDetail(body.data, newAyah),
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.use(requiredMiddleware);
+
+app.get('/me', async function (req, res) {
+  try {
+    const { user_id } = req.user;
+
+    const sqlUser = 'SELECT * FROM users WHERE id = ? LIMIT 1';
+
+    const [resultUser] = await db.query(sqlUser, [user_id]);
+
+    const data = resultUser.map((e) => {
+      return {
+        id: e.id,
+        name: e.name,
+        username: e.username,
+      };
+    });
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+      data: data[0],
     });
   } catch (err) {
     res.status(500).json({
