@@ -34,4 +34,15 @@ const responseListAyat = (ayat, favorites, checkpoints) => {
   });
 };
 
-export { responseList, responseListAyat, responseListDetail };
+const responseListAyatFavorite = (ayat) => {
+  return ayat.map((e) => {
+    return JSON.parse(e.ayah_json);
+  });
+};
+
+export {
+  responseList,
+  responseListAyat,
+  responseListAyatFavorite,
+  responseListDetail,
+};

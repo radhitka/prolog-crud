@@ -5,6 +5,7 @@ import express from 'express';
 import {
   responseList,
   responseListAyat,
+  responseListAyatFavorite,
   responseListDetail,
 } from './response/index.js';
 
@@ -202,7 +203,7 @@ app.get('/me', async function (req, res) {
     const sqlFavoriteAyat =
       'SELECT count(*) total FROM ayah_favorites WHERE user_id = ? LIMIT 1';
     const sqlCheckpointsAyat =
-      'SELECT count(*) total FROM ayah_checkpoints WHERE user_id = ? LIMIT 1';
+      'SELECT * FROM ayah_checkpoints WHERE user_id = ? LIMIT 1';
 
     const [totalFavSurah] = await db.query(sqlFavoriteSurah, [user_id]);
     const [totalFavAyah] = await db.query(sqlFavoriteAyat, [user_id]);
@@ -215,7 +216,10 @@ app.get('/me', async function (req, res) {
         username: e.username,
         favSurah: totalFavSurah[0].total,
         favAyah: totalFavAyah[0].total,
-        checkpointAyah: totalFavCheckAyah[0].total,
+        checkpoint: {
+          surah: totalFavCheckAyah[0].surah_id,
+          ayah: totalFavCheckAyah[0].ayah_id,
+        },
       };
     });
 
@@ -271,10 +275,13 @@ app.post('/surah/favorite/:nomor', async function (req, res) {
 
     const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor]);
 
+    var isAdd = 1;
+
     if (resultsDetail.length > 0) {
       const sqlDelete = 'DELETE FROM surah_favorites WHERE id = ?';
 
       await db.query(sqlDelete, [resultsDetail[0].id]);
+      isAdd = 0;
     } else {
       const sqlInsert =
         'INSERT INTO surah_favorites (user_id, surah_id) VALUES (?, ?)';
@@ -285,6 +292,7 @@ app.post('/surah/favorite/:nomor', async function (req, res) {
     res.status(200).json({
       code: 200,
       message: 'Success',
+      isAdd,
     });
   } catch (err) {
     res.status(500).json({
@@ -305,20 +313,35 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
 
     const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
 
+    var isAdd = 1;
+
     if (resultsDetail.length > 0) {
       const sqlDelete = 'DELETE FROM ayah_favorites WHERE id = ?';
 
       await db.query(sqlDelete, [resultsDetail[0].id]);
+      isAdd = 0;
     } else {
-      const sqlInsert =
-        'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id) VALUES (?, ? , ?)';
+      const response = await httpAxios.get(`/surat/${nomor}`);
 
-      await db.query(sqlInsert, [user_id, nomor, ayah]);
+      const body = response?.data;
+
+      const listAyah = body.data.ayat.filter((e) => e.nomorAyat == ayah)[0];
+
+      const sqlInsert =
+        'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id, ayah_json) VALUES (?, ?, ?, ?)';
+
+      await db.query(sqlInsert, [
+        user_id,
+        nomor,
+        ayah,
+        JSON.stringify(listAyah),
+      ]);
     }
 
     res.status(200).json({
       code: 200,
       message: 'Success',
+      isAdd,
     });
   } catch (err) {
     res.status(500).json({
@@ -340,9 +363,11 @@ app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
     const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
 
     if (resultsDetail.length > 0) {
-      const sqlDelete = 'DELETE FROM ayah_checkpoints WHERE id = ?';
+      const sqlUpdate =
+        'UPDATE ayah_checkpoints SET surah_id = ?, ayah_id = ? WHERE id = ?';
+      // const sqlDelete = 'DELETE FROM ayah_checkpoints WHERE id = ?';
 
-      await db.query(sqlDelete, [resultsDetail[0].id]);
+      await db.query(sqlUpdate, [nomor, ayah, resultsDetail[0].id]);
     } else {
       const sqlInsert =
         'INSERT INTO ayah_checkpoints (user_id, surah_id, ayah_id) VALUES (?, ? , ?)';
@@ -353,6 +378,27 @@ app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
     res.status(200).json({
       code: 200,
       message: 'Success',
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.get('/surah/favorites/ayah/list', async function (req, res) {
+  const { user_id } = req.user;
+
+  try {
+    const sqlFavorite = 'SELECT * FROM ayah_favorites WHERE user_id = ?';
+
+    const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+      data: responseListAyatFavorite(resultsFavorite),
     });
   } catch (err) {
     res.status(500).json({
