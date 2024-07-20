@@ -39,8 +39,7 @@
               <a
                 href="#"
                 id="goToCheckpoint"
-                class="text-blue-500 hover:underline ml-2"
-                onclick="goToCheckpoint()"
+                class="text-blue-500 hover:underline ml-2 hidden"
               >
                 Buka
               </a>
@@ -68,7 +67,9 @@
           >
           <a
             href="/"
+            id="logout"
             class="text-red-500 hover:underline block text-center mt-4"
+            onclick="logout()"
             >Keluar</a
           >
         </div>
@@ -79,11 +80,6 @@
     <script src="/js/script.js"></script>
     <script>
       fetchProfile();
-
-      function goToCheckpoint() {
-        // Ganti dengan logika untuk menuju ke checkpoint
-        alert("Navigasi ke checkpoint");
-      }
     </script>
   </body>
 </html>

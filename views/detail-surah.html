@@ -29,7 +29,22 @@
     <script src="/js/component.js"></script>
     <script src="/js/script.js"></script>
     <script>
-      fetchSurahDetails();
+      document.addEventListener("DOMContentLoaded", async () => {
+        await fetchSurahDetails();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const checkpointAyahNumber = urlParams.get("checkpointAyahNumber");
+        if (checkpointAyahNumber) {
+          scrollToAyah(checkpointAyahNumber);
+        }
+      });
+
+      function scrollToAyah(number) {
+        const ayahElement = document.getElementById(`nomorAyat-${number}`);
+        if (ayahElement) {
+          ayahElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }
     </script>
   </body>
 </html>
