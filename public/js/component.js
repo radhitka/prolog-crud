@@ -8,25 +8,25 @@ navbar.insertAdjacentHTML(
   `
     <div class="container mx-auto flex justify-between items-center px-6">
         <a href="#" class="text-2xl font-bold">baca.quran</a>
-        <div class="flex space-x-5">
-          <a href="/" class="font-semibold text-gray-700 hover:text-blue-500"
+        <div class="flex space-x-8">
+          <a href="/" class="font-semibold text-gray-700 hover:text-blue-500 hover:underline"
             >Home</a
           >
           <a
             href="/surah"
-            class="font-semibold text-gray-700 hover:text-blue-500"
+            class="font-semibold text-gray-700 hover:text-blue-500 hover:underline"
             >Surah</a
           >
           <a
             href="/profile"
             id="profile-link"
-            class="font-semibold text-gray-700 hover:text-blue-500 hidden"
+            class="font-semibold text-gray-700 hover:text-blue-500 hover:underline hidden"
             >Profile</a
           >
           <a
             href="/login"
             id="login-link"
-            class="font-semibold text-gray-700 hover:text-blue-500"
+            class="font-semibold text-gray-700 hover:text-blue-500 hover:underline"
             >Login</a
           >
         </div>
