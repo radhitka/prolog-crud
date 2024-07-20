@@ -3,8 +3,10 @@ import cors from 'cors';
 import express from 'express';
 import { responseList, responseListDetail } from './response/index.js';
 
+import 'dotenv/config';
+
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const httpAxios = axios.create({
   baseURL: 'https://equran.id/api/v2/',
