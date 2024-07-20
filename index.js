@@ -197,11 +197,25 @@ app.get('/me', async function (req, res) {
 
     const [resultUser] = await db.query(sqlUser, [user_id]);
 
+    const sqlFavoriteSurah =
+      'SELECT count(*) total FROM surah_favorites WHERE user_id = ? LIMIT 1';
+    const sqlFavoriteAyat =
+      'SELECT count(*) total FROM ayah_favorites WHERE user_id = ? LIMIT 1';
+    const sqlCheckpointsAyat =
+      'SELECT count(*) total FROM ayah_checkpoints WHERE user_id = ? LIMIT 1';
+
+    const [totalFavSurah] = await db.query(sqlFavoriteSurah, [user_id]);
+    const [totalFavAyah] = await db.query(sqlFavoriteAyat, [user_id]);
+    const [totalFavCheckAyah] = await db.query(sqlCheckpointsAyat, [user_id]);
+
     const data = resultUser.map((e) => {
       return {
         id: e.id,
         name: e.name,
         username: e.username,
+        favSurah: totalFavSurah[0].total,
+        favAyah: totalFavAyah[0].total,
+        checkpointAyah: totalFavCheckAyah[0].total,
       };
     });
 
