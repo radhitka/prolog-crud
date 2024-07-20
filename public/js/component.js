@@ -1,4 +1,5 @@
 let navbar = document.getElementById("navbar");
+let user = JSON.parse(localStorage.getItem("user")) || null;
 
 // Add navbar component
 navbar.className = "w-full bg-white shadow-md py-4";
@@ -32,3 +33,13 @@ navbar.insertAdjacentHTML(
       </div>
     `
 );
+
+let profileLink = document.getElementById("profile-link");
+let loginLink = document.getElementById("login-link");
+if (user?.username) {
+  profileLink.classList.remove("hidden");
+  loginLink.classList.add("hidden");
+} else {
+  profileLink.classList.add("hidden");
+  loginLink.classList.remove("hidden");
+}

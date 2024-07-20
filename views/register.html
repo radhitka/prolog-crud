@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register - baca.quran</title>
+    <title>Daftar - baca.quran</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body
@@ -19,7 +19,7 @@
       class="flex flex-col items-center justify-center py-8 mt-16 w-full"
     >
       <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">Daftar</h2>
         <form id="register-form" class="space-y-6">
           <div>
             <label for="name" class="block text-gray-700">Nama Lengkap</label>
@@ -31,10 +31,10 @@
             />
           </div>
           <div>
-            <label for="email" class="block text-gray-700">Email</label>
+            <label for="username" class="block text-gray-700">Username</label>
             <input
-              type="email"
-              id="email"
+              type="text"
+              id="username"
               class="w-full p-2 border border-gray-300 rounded mt-1"
               required
             />
@@ -63,7 +63,7 @@
             type="submit"
             class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
           >
-            Register
+            Daftar
           </button>
         </form>
         <p class="text-center mt-4">
@@ -73,7 +73,67 @@
       </div>
     </section>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/component.js"></script>
-    <script src="/js/script.js"></script>
+    <script>
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirm-password").value;
+
+          if (password !== confirmPassword) {
+            Swal.fire({
+              title: "Password Tidak Cocok",
+              text: "Password dan konfirmasi password tidak cocok.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+
+          try {
+            const response = await fetch("http://localhost:3000/register", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name, username, password }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              Swal.fire({
+                title: "Pendaftaran Berhasil!",
+                text: "Selamat datang " + name + "!",
+                icon: "success",
+                confirmButtonText: "OK",
+              }).then(() => {
+                window.location.href = "/surah";
+              });
+            } else {
+              Swal.fire({
+                title: "Pendaftaran Gagal",
+                text: result.message,
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            Swal.fire({
+              title: "Error",
+              text: "Terjadi kesalahan. Silakan coba lagi.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        });
+    </script>
   </body>
 </html>

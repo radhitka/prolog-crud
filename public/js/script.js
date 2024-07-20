@@ -4,10 +4,11 @@ const loader = document.getElementById("loader");
 
 // Fetch list of surah
 async function fetchSurahList() {
+  const surahList = document.getElementById("surah-list");
+
   try {
     const response = await fetch("http://localhost:3000/surah");
     const data = await response.json();
-    const surahList = document.getElementById("surah-list");
 
     data.data.forEach((surah) => {
       surahList.insertAdjacentHTML(
@@ -37,7 +38,7 @@ async function fetchSurahList() {
 }
 
 // Load favorite ayahs
-function loadFavoriteAyahs() {
+function fetchFavoriteAyahs() {
   const favoriteListContainer = document.getElementById("favorite-list");
   const favoriteAyahs = JSON.parse(localStorage.getItem("favoriteAyahs")) || [];
 
@@ -224,6 +225,7 @@ async function fetchSurahDetails() {
   }
 }
 
+// Trigger audio
 function toggleAudio(audioUrl, iconElement) {
   if (currentAudio && !currentAudio.paused) {
     currentAudio.pause();
@@ -253,6 +255,7 @@ function toggleAudio(audioUrl, iconElement) {
   }
 }
 
+// Save to favorite
 function toggleFavorite(
   iconElement,
   surahNumber,
@@ -291,6 +294,7 @@ function toggleFavorite(
   localStorage.setItem("favoriteAyahs", JSON.stringify(favoriteAyahs));
 }
 
+//
 function toggleCheckpoint(iconElement, surahNumber, ayahNumber) {
   let checkpoints = {};
 
