@@ -218,6 +218,35 @@ app.get('/me', async function (req, res) {
   }
 });
 
+app.get('/surah/favorites/list', async function (req, res) {
+  const { user_id } = req.user;
+
+  try {
+    const sqlFavorite = 'SELECT * FROM surah_favorites WHERE user_id = ?';
+
+    const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
+
+    const response = await httpAxios.get('/surat');
+
+    const body = response?.data;
+
+    const newData = responseList(body.data, resultsFavorite).filter((e) => {
+      return e.isFavorite;
+    });
+
+    res.status(body.code).json({
+      code: body.code,
+      message: body.message,
+      data: newData,
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
 app.post('/surah/favorite/:nomor', async function (req, res) {
   const { nomor } = req.params;
   const { user_id } = req.user;
