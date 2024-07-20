@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - baca.quran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+  >
+    <!-- Navbar -->
+    <nav id="navbar">
+      <!-- Menu navbar akan di-load di sini -->
+    </nav>
+
+    <!-- Register Section -->
+    <section
+      class="flex flex-col items-center justify-center py-8 mt-16 w-full"
+    >
+      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center mb-6">Register</h2>
+        <form id="register-form" class="space-y-6">
+          <div>
+            <label for="name" class="block text-gray-700">Nama Lengkap</label>
+            <input
+              type="text"
+              id="name"
+              class="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-gray-700">Email</label>
+            <input
+              type="email"
+              id="email"
+              class="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </div>
+          <div>
+            <label for="password" class="block text-gray-700">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </div>
+          <div>
+            <label for="confirm-password" class="block text-gray-700"
+              >Konfirmasi Password</label
+            >
+            <input
+              type="password"
+              id="confirm-password"
+              class="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          >
+            Register
+          </button>
+        </form>
+        <p class="text-center mt-4">
+          Sudah punya akun?
+          <a href="/login" class="text-blue-500 hover:underline">Login</a>
+        </p>
+      </div>
+    </section>
+
+    <script src="/js/component.js"></script>
+    <script src="/js/script.js"></script>
+  </body>
+</html>
