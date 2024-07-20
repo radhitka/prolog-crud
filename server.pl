@@ -8,6 +8,8 @@ start_server :-
 
 % Server HTTP
 :- http_handler('/', welcomePage, []).
+:- http_handler('/login', loginPage, []).
+:- http_handler('/register', registerPage, []).
 :- http_handler('/profile', profilePage, []).
 :- http_handler('/surah', surahPage, []).
 :- http_handler('/detail-surah', detailSurahPage, []).
@@ -17,6 +19,14 @@ start_server :-
 % Predikat untuk melayani file index.html
 welcomePage(Request) :-
     http_reply_file('index.html', [], Request).
+
+% Predikat untuk melayani file login.html
+loginPage(Request) :-
+    http_reply_file('login.html', [], Request).
+
+% Predikat untuk melayani file register.html
+registerPage(Request) :-
+    http_reply_file('register.html', [], Request).
 
 % Predikat untuk melayani file profile.html
 profilePage(Request) :-
