@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ayat Favorit - bacaquran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex flex-col items-center justify-start py-8"
+  >
+    <!-- Navbar -->
+    <nav id="navbar">
+      <!-- Menu navbar akan di-load di sini -->
+    </nav>
+
+    <section class="flex flex-col items-center justify-start py-8">
+      <h1 class="text-4xl font-bold text-white mb-6">Ayat Favorit</h1>
+      <div
+        id="favorite-list"
+        class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl"
+      >
+        <!-- Daftar ayat favorit akan dimuat di sini secara dinamis -->
+      </div>
+    </section>
+
+    <script src="/js/component.js"></script>
+    <script src="/js/script.js"></script>
+    <script>
+      loadFavoriteAyahs();
+    </script>
+  </body>
+</html>
