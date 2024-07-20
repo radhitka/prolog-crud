@@ -25,7 +25,7 @@
               id="username"
               class="p-2 border border-gray-300 rounded bg-gray-100"
             >
-              John Doe
+              -
             </p>
           </div>
           <div class="profile-item">
@@ -35,9 +35,10 @@
             <div
               class="flex justify-between border border-gray-300 rounded bg-gray-100 p-2"
             >
-              <p>Surat 2, Ayat 30</p>
+              <p id="checkpointInfo">Tidak ada checkpoint</p>
               <a
                 href="#"
+                id="goToCheckpoint"
                 class="text-blue-500 hover:underline ml-2"
                 onclick="goToCheckpoint()"
               >
@@ -52,7 +53,7 @@
             <div
               class="flex justify-between border border-gray-300 rounded bg-gray-100 p-2"
             >
-              <p>5 ayat</p>
+              <p><span id="totalFavAyah">0</span> ayat</p>
               <a
                 href="/favorite-ayahs"
                 class="text-blue-500 hover:underline ml-2"

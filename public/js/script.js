@@ -158,19 +158,22 @@ async function fetchFavoriteAyahs() {
 
   try {
     // const response = await fetch("http://localhost:3000/surah");
-    const response = await fetch("http://localhost:3000/surah/favorites/list", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: user?.token,
-      },
-    });
+    const response = await fetch(
+      "http://localhost:3000/surah/favorites/ayah/list",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user?.token,
+        },
+      }
+    );
 
     const data = await response.json();
     favoriteAyahs = data?.data || [];
 
-    console.log(data);
-    console.log(favoriteAyahs);
+    // console.log(data);
+    // console.log(favoriteAyahs);
   } catch (error) {
     console.error(error);
   } finally {
@@ -189,11 +192,11 @@ async function fetchFavoriteAyahs() {
         `
           <li class="py-4">
               <div class="flex justify-between items-center py-4">
-                  <div class="font-bold pr-5">${ayah.number}:${ayah.numberOfAyahs}</div>
-                  <div class="text-2xl text-right font-bold">${ayah.name}</div>
+                  <div class="font-bold pr-5">${ayah.surah}:${ayah.nomorAyat}</div>
+                  <div class="text-2xl text-right font-bold">${ayah.teksArab}</div>
               </div>
               <div class="text-sm font-normal">
-                  ${ayah.englishNameTranslation}
+                  ${ayah.teksIndonesia}
               </div>
           </li>
       `
@@ -252,7 +255,7 @@ async function toggleFavorite(iconElement, surahNumber, ayahNumber) {
 
     const data = await response.json();
 
-    if (data?.data?.isAdd == false) {
+    if (data?.isAdd == false) {
       // Remove from favorites
       // favoriteAyahs.splice(ayahIndex, 1);
       iconElement.innerHTML = `
@@ -320,9 +323,9 @@ async function fetchProfile() {
   }
 
   try {
-    const usernameElement = document.getElementById("username");
-    const checkpointElement = document.getElementById("checkpoint");
-    const favoritesElement = document.getElementById("favorites");
+    const username = document.getElementById("username");
+    const checkpointInfo = document.getElementById("checkpointInfo");
+    const totalFavAyah = document.getElementById("totalFavAyah");
 
     const response = await fetch("http://localhost:3000/me", {
       method: "GET",
@@ -339,9 +342,9 @@ async function fetchProfile() {
     const data = await response.json();
 
     // Update profil dengan data user
-    usernameElement.innerHTML = data.data.username;
-    checkpointElement.innerHTML = `Surat ${data?.data?.checkpoint.surah}, Ayat ${data?.data?.checkpoint.ayah} <a href="#" class="text-blue-500 hover:underline ml-2" onclick="goToCheckpoint()">Buka</a>`;
-    favoritesElement.innerHTML = `${data?.data?.totalFavorites} ayat <a href="/favorite-ayahs" class="text-blue-500 hover:underline ml-2">Lihat Favorit</a>`;
+    username.innerText = data?.data?.username;
+    checkpointInfo.innerHTML = `Surat ${data?.data?.checkpoint.surah}, Ayat ${data?.data?.checkpoint.ayah}`;
+    totalFavAyah.innerText = data?.data?.favAyah;
   } catch (error) {
     console.error("Error fetching profile data:", error);
   }
