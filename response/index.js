@@ -1,4 +1,4 @@
-const responseList = (data) => {
+const responseList = (data, surahFavorites) => {
   return data.map((e) => {
     return {
       number: e.nomor,
@@ -7,6 +7,7 @@ const responseList = (data) => {
       englishNameTranslation: e.arti,
       numberOfAyahs: e.jumlahAyat,
       revelationType: e.tempatTurun,
+      isFavorite: surahFavorites.some((fav) => fav.surah_id == e.nomor),
     };
   });
 };

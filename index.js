@@ -38,15 +38,26 @@ app.use(
 );
 
 app.get('/surah', async function (req, res) {
-  const response = await httpAxios.get('/surat');
+  try {
+    const sqlFavorite = 'SELECT * FROM surah_favorites WHERE user_id = ? ';
 
-  const body = response?.data;
+    const [resultsFavorite] = await db.query(sqlFavorite, [1]);
 
-  res.json({
-    code: body.code,
-    message: body.message,
-    data: responseList(body.data),
-  });
+    const response = await httpAxios.get('/surat');
+
+    const body = response?.data;
+
+    res.json({
+      code: body.code,
+      message: body.message,
+      data: responseList(body.data, resultsFavorite),
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
 });
 
 app.get('/surah/:nomor', async function (req, res) {
@@ -88,6 +99,38 @@ app.get('/surah/:nomor', async function (req, res) {
 
 app.post('/surah/favorite/:nomor', async function (req, res) {
   const { nomor } = req.params;
+
+  try {
+    const sqlDetail =
+      'SELECT * FROM surah_favorites WHERE user_id = ? and surah_id = ? LIMIT 1';
+
+    const [resultsDetail] = await db.query(sqlDetail, [1, nomor]);
+
+    if (resultsDetail.length > 0) {
+      const sqlDelete = 'DELETE FROM surah_favorites WHERE id = ?';
+
+      await db.query(sqlDelete, [resultsDetail[0].id]);
+    } else {
+      const sqlInsert =
+        'INSERT INTO surah_favorites (user_id, surah_id) VALUES (?, ?)';
+
+      await db.query(sqlInsert, [1, nomor]);
+    }
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
+  const { nomor } = req.params;
   const { ayah } = req.body;
 
   try {
@@ -119,7 +162,7 @@ app.post('/surah/favorite/:nomor', async function (req, res) {
   }
 });
 
-app.post('/surah/checkpoints/:nomor', async function (req, res) {
+app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
   const { nomor } = req.params;
   const { ayah } = req.body;
 
