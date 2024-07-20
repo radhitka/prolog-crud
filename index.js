@@ -1,4 +1,5 @@
 import axios from 'axios';
+import bcrypt from 'bcrypt';
 import cors from 'cors';
 import express from 'express';
 import {
@@ -8,7 +9,9 @@ import {
 } from './response/index.js';
 
 import 'dotenv/config';
+import generateAuthToken from './config/jwt.js';
 import db from './database/index.js';
+import { loginMiddleware } from './middleware/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,17 +40,129 @@ app.use(
   })
 );
 
+app.post('/register', async function (req, res) {
+  const { name, username, password } = req.body;
+
+  try {
+    const sqlUser = 'SELECT * FROM users WHERE username = ?';
+
+    const [resultUsers] = await db.query(sqlUser, username);
+
+    if (resultUsers.length > 0) {
+      res.status(422).json({
+        code: 422,
+        message: `Username ${username} sudah digunakan!`,
+      });
+      return;
+    }
+
+    const sqlRegister =
+      'INSERT INTO users (name, username, password) VALUES (?, ?, ?)';
+
+    const newPassword = await bcrypt.hash(password, 10);
+
+    await db.query(sqlRegister, [name, username, newPassword]);
+
+    res.status(201).json({
+      code: 201,
+      message: 'Success',
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.post('/login', async function (req, res) {
+  const { username, password } = req.body;
+
+  try {
+    const sqlUser = 'SELECT * FROM users WHERE username = ? LIMIT 1';
+
+    const [resultUsers] = await db.query(sqlUser, username);
+
+    if (resultUsers.length == 0) {
+      res.status(422).json({
+        code: 422,
+        message: `Username dan Password Salah!`,
+      });
+      return;
+    }
+
+    const validPassword = await bcrypt.compare(
+      password,
+      resultUsers[0].password
+    );
+
+    if (!validPassword) {
+      res.status(422).json({
+        code: 422,
+        message: `Username dan Password Salah!`,
+      });
+      return;
+    }
+
+    const token = generateAuthToken(resultUsers[0].id);
+
+    res.status(201).json({
+      code: 201,
+      message: 'Success',
+      token: token,
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.use(loginMiddleware);
+
+app.get('/me', async function (req, res) {
+  try {
+    const { user_id } = req.user;
+
+    const sqlUser = 'SELECT * FROM users WHERE id = ? LIMIT 1';
+
+    const [resultUser] = await db.query(sqlUser, [user_id]);
+
+    const data = resultUser.map((e) => {
+      return {
+        id: e.id,
+        name: e.name,
+        username: e.username,
+      };
+    });
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+      data: data[0],
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
 app.get('/surah', async function (req, res) {
   try {
+    const { user_id } = req.user;
+
     const sqlFavorite = 'SELECT * FROM surah_favorites WHERE user_id = ? ';
 
-    const [resultsFavorite] = await db.query(sqlFavorite, [1]);
+    const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
 
     const response = await httpAxios.get('/surat');
 
     const body = response?.data;
 
-    res.json({
+    res.status(body.code).json({
       code: body.code,
       message: body.message,
       data: responseList(body.data, resultsFavorite),
@@ -62,17 +177,21 @@ app.get('/surah', async function (req, res) {
 
 app.get('/surah/:nomor', async function (req, res) {
   const nomor = req.params.nomor;
+  const { user_id } = req.user;
 
   try {
     const sqlFavorite =
       'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? ';
 
-    const [resultsFavorite] = await db.query(sqlFavorite, [1, nomor]);
+    const [resultsFavorite] = await db.query(sqlFavorite, [user_id, nomor]);
 
     const sqlCheckpoint =
       'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? ';
 
-    const [resultsCheckpoints] = await db.query(sqlCheckpoint, [1, nomor]);
+    const [resultsCheckpoints] = await db.query(sqlCheckpoint, [
+      user_id,
+      nomor,
+    ]);
 
     const response = await httpAxios.get(`/surat/${nomor}`);
 
@@ -84,7 +203,7 @@ app.get('/surah/:nomor', async function (req, res) {
       resultsCheckpoints
     );
 
-    res.json({
+    res.status(body.code).json({
       code: body.code,
       message: body.message,
       data: responseListDetail(body.data, newAyah),
@@ -99,12 +218,13 @@ app.get('/surah/:nomor', async function (req, res) {
 
 app.post('/surah/favorite/:nomor', async function (req, res) {
   const { nomor } = req.params;
+  const { user_id } = req.user;
 
   try {
     const sqlDetail =
       'SELECT * FROM surah_favorites WHERE user_id = ? and surah_id = ? LIMIT 1';
 
-    const [resultsDetail] = await db.query(sqlDetail, [1, nomor]);
+    const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor]);
 
     if (resultsDetail.length > 0) {
       const sqlDelete = 'DELETE FROM surah_favorites WHERE id = ?';
@@ -114,7 +234,7 @@ app.post('/surah/favorite/:nomor', async function (req, res) {
       const sqlInsert =
         'INSERT INTO surah_favorites (user_id, surah_id) VALUES (?, ?)';
 
-      await db.query(sqlInsert, [1, nomor]);
+      await db.query(sqlInsert, [user_id, nomor]);
     }
 
     res.status(200).json({
@@ -132,12 +252,13 @@ app.post('/surah/favorite/:nomor', async function (req, res) {
 app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
   const { nomor } = req.params;
   const { ayah } = req.body;
+  const { user_id } = req.user;
 
   try {
     const sqlDetail =
       'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? and ayah_id = ? LIMIT 1';
 
-    const [resultsDetail] = await db.query(sqlDetail, [1, nomor, ayah]);
+    const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
 
     if (resultsDetail.length > 0) {
       const sqlDelete = 'DELETE FROM ayah_favorites WHERE id = ?';
@@ -147,7 +268,7 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
       const sqlInsert =
         'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id) VALUES (?, ? , ?)';
 
-      await db.query(sqlInsert, [1, nomor, ayah]);
+      await db.query(sqlInsert, [user_id, nomor, ayah]);
     }
 
     res.status(200).json({
@@ -165,12 +286,13 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
 app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
   const { nomor } = req.params;
   const { ayah } = req.body;
+  const { user_id } = req.user;
 
   try {
     const sqlDetail =
       'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? and ayah_id = ? LIMIT 1';
 
-    const [resultsDetail] = await db.query(sqlDetail, [1, nomor, ayah]);
+    const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
 
     if (resultsDetail.length > 0) {
       const sqlDelete = 'DELETE FROM ayah_checkpoints WHERE id = ?';
@@ -180,7 +302,7 @@ app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
       const sqlInsert =
         'INSERT INTO ayah_checkpoints (user_id, surah_id, ayah_id) VALUES (?, ? , ?)';
 
-      await db.query(sqlInsert, [1, nomor, ayah]);
+      await db.query(sqlInsert, [user_id, nomor, ayah]);
     }
 
     res.status(200).json({
