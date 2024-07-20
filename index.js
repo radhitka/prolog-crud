@@ -358,9 +358,9 @@ app.post('/surah/checkpoints/ayah/:nomor', async function (req, res) {
 
   try {
     const sqlDetail =
-      'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? and ayah_id = ? LIMIT 1';
+      'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? LIMIT 1';
 
-    const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
+    const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor]);
 
     if (resultsDetail.length > 0) {
       const sqlUpdate =
