@@ -1,7 +1,11 @@
 import axios from 'axios';
 import cors from 'cors';
 import express from 'express';
-import { responseList, responseListDetail } from './response/index.js';
+import {
+  responseList,
+  responseListAyat,
+  responseListDetail,
+} from './response/index.js';
 
 import 'dotenv/config';
 import db from './database/index.js';
@@ -47,15 +51,39 @@ app.get('/surah', async function (req, res) {
 
 app.get('/surah/:nomor', async function (req, res) {
   const nomor = req.params.nomor;
-  const response = await httpAxios.get(`/surat/${nomor}`);
 
-  const body = response?.data;
+  try {
+    const sqlFavorite =
+      'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? ';
 
-  res.json({
-    code: body.code,
-    message: body.message,
-    data: responseListDetail(body.data),
-  });
+    const [resultsFavorite] = await db.query(sqlFavorite, [1, nomor]);
+
+    const sqlCheckpoint =
+      'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? ';
+
+    const [resultsCheckpoints] = await db.query(sqlCheckpoint, [1, nomor]);
+
+    const response = await httpAxios.get(`/surat/${nomor}`);
+
+    const body = response?.data;
+
+    const newAyah = responseListAyat(
+      body.data.ayat,
+      resultsFavorite,
+      resultsCheckpoints
+    );
+
+    res.json({
+      code: body.code,
+      message: body.message,
+      data: responseListDetail(body.data, newAyah),
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
 });
 
 app.post('/surah/favorite/:nomor', async function (req, res) {
