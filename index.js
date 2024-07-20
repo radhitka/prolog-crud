@@ -325,7 +325,14 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
 
       const body = response?.data;
 
-      const listAyah = body.data.ayat.filter((e) => e.nomorAyat == ayah)[0];
+      const surahParent = body.data;
+
+      const listAyah = surahParent.ayat
+        .map((e) => {
+          e.surah = surahParent.nomor;
+          return e;
+        })
+        .filter((e) => e.nomorAyat == ayah)[0];
 
       const sqlInsert =
         'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id, ayah_json) VALUES (?, ?, ?, ?)';
