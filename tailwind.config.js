@@ -2,7 +2,11 @@
 module.exports = {
   content: ['./views/*.{html,js}', './public/js/*.js'],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        arabic: ['Noto Sans Arabic', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };

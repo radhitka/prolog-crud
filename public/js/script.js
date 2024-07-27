@@ -1,34 +1,34 @@
 // Global variables
-const loader = document.getElementById("loader");
+const loader = document.getElementById('loader');
 
 let currentAudio = null;
 let headers = {
-  "Content-Type": "application/json",
+  'Content-Type': 'application/json',
 };
 
 // Fetch list of surah
 async function fetchSurahList() {
-  const surahList = document.getElementById("surah-list");
+  const surahList = document.getElementById('surah-list');
 
   try {
-    const response = await fetch("http://localhost:3000/surah");
+    const response = await fetch('http://localhost:3000/surah');
     const data = await response.json();
 
     data.data.forEach((surah) => {
       surahList.insertAdjacentHTML(
-        "beforeend",
+        'beforeend',
         `
             <li class="py-4 px-2">
                 <a href="/detail-surah?number=${surah.number}" class="flex justify-between items-center">
                     <div class="flex justify-between items-center">
                         <p class="text-lg font-bold mr-5">${surah.number}.</p>
                         <div class="text-gray-700">
-                            <span class="block text-lg font-bold">${surah.englishName}</span>
+                            <span class="block text-lg font-arabic">${surah.englishName}</span>
                             <span class="block text-sm font-semibold">${surah.englishNameTranslation}</span> 
                         </div>
                     </div>
                     <div class="">
-                        <span class="block text-lg text-right font-bold">${surah.name}</span>
+                        <span class="block text-3xl text-right font-arabic">${surah.name}</span>
                         <span class="block text-sm text-right font-semibold">${surah.numberOfAyahs} Ayat</span> 
                     </div>
                 </a>
@@ -37,33 +37,33 @@ async function fetchSurahList() {
       );
     });
   } catch (error) {
-    console.error("Error fetching surah list:", error);
+    console.error('Error fetching surah list:', error);
   }
 }
 
 // Load detail of surah
 async function fetchSurahDetails() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const ayahListContainer = document.getElementById("ayah-list");
-  ayahListContainer.classList.add("hidden");
+  const user = JSON.parse(localStorage.getItem('user'));
+  const ayahListContainer = document.getElementById('ayah-list');
+  ayahListContainer.classList.add('hidden');
 
-  loader.style.display = "block";
+  loader.style.display = 'block';
 
   try {
     let surah;
 
     const urlParams = new URLSearchParams(window.location.search);
-    const number = urlParams.get("number");
+    const number = urlParams.get('number');
 
     if (user?.token) {
-      headers["Authorization"] = user?.token;
+      headers['Authorization'] = user?.token;
     }
 
     // console.log(headers);
 
     // Fetch data from API
     const responseSurah = await fetch(`http://localhost:3000/surah/${number}`, {
-      method: "GET",
+      method: 'GET',
       headers: headers,
     });
 
@@ -71,12 +71,12 @@ async function fetchSurahDetails() {
 
     // console.log(surah);
 
-    const surahTitle = document.getElementById("surah-title");
+    const surahTitle = document.getElementById('surah-title');
     surahTitle.textContent = `${surah.data.number}. ${surah.data.englishName}`;
 
-    const ayahListContainer = document.getElementById("ayah-list");
-    const ayahList = document.createElement("ul");
-    ayahList.classList.add("divide-y", "divide-gray-300");
+    const ayahListContainer = document.getElementById('ayah-list');
+    const ayahList = document.createElement('ul');
+    ayahList.classList.add('divide-y', 'divide-gray-300');
 
     surah.data.ayahs.forEach((ayah) => {
       console.log({
@@ -86,12 +86,12 @@ async function fetchSurahDetails() {
       });
 
       ayahList.insertAdjacentHTML(
-        "beforeend",
+        'beforeend',
         `
           <li class="py-4" id="nomorAyat-${ayah.nomorAyat}">
               <div class="flex justify-between items-center py-4">
                   <div class="font-bold pr-5">${ayah.nomorAyat}.</div>
-                  <div class="text-2xl text-right font-bold">${
+                  <div class="text-3xl text-right font-arabic">${
                     ayah.teksArab
                   }</div>
               </div>
@@ -101,7 +101,7 @@ async function fetchSurahDetails() {
                   </p>
                   <div class="flex items-center gap-2">
                       <span class="play-icon" title="Play audio" onclick="toggleAudio('${
-                        ayah.audio["01"]
+                        ayah.audio['01']
                       }', this)">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 cursor-pointer text-green-500" viewBox="0 0 20 20" fill="currentColor">
                               <path d="M5 4v12l10-6-10-6z" stroke="currentColor" />
@@ -152,27 +152,27 @@ async function fetchSurahDetails() {
 
     ayahListContainer.appendChild(ayahList);
   } catch (error) {
-    console.error("Error fetching surah details:", error);
+    console.error('Error fetching surah details:', error);
   } finally {
-    loader.style.display = "none";
-    ayahListContainer.classList.remove("hidden");
+    loader.style.display = 'none';
+    ayahListContainer.classList.remove('hidden');
   }
 }
 
 // Load favorite ayahs
 async function fetchFavoriteAyahs() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const favoriteListContainer = document.getElementById("favorite-list");
+  const user = JSON.parse(localStorage.getItem('user'));
+  const favoriteListContainer = document.getElementById('favorite-list');
   let favoriteAyahs = [];
 
   try {
     // const response = await fetch("http://localhost:3000/surah");
     const response = await fetch(
-      "http://localhost:3000/surah/favorites/ayah/list",
+      'http://localhost:3000/surah/favorites/ayah/list',
       {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: user?.token,
         },
       }
@@ -192,17 +192,17 @@ async function fetchFavoriteAyahs() {
       return;
     }
 
-    const favoriteList = document.createElement("ul");
-    favoriteList.classList.add("divide-y", "divide-gray-300");
+    const favoriteList = document.createElement('ul');
+    favoriteList.classList.add('divide-y', 'divide-gray-300');
 
     favoriteAyahs.forEach((ayah) => {
       favoriteList.insertAdjacentHTML(
-        "beforeend",
+        'beforeend',
         `
           <li class="py-4">
               <div class="flex justify-between items-center py-4">
                   <div class="font-bold pr-5">${ayah.surah}:${ayah.nomorAyat}</div>
-                  <div class="text-2xl text-right font-bold">${ayah.teksArab}</div>
+                  <div class="text-4xl text-right font-arabic">${ayah.teksArab}</div>
               </div>
               <div class="text-sm font-normal">
                   ${ayah.teksIndonesia}
@@ -220,7 +220,7 @@ async function fetchFavoriteAyahs() {
 function toggleAudio(audioUrl, iconElement) {
   if (currentAudio && !currentAudio.paused) {
     currentAudio.pause();
-    document.querySelector(".pause-icon").innerHTML = `
+    document.querySelector('.pause-icon').innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 cursor-pointer text-green-500" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M5 4v12l10-6-10-6z" />
                     </svg>
@@ -235,7 +235,7 @@ function toggleAudio(audioUrl, iconElement) {
                     </svg>
                 `;
 
-    currentAudio.addEventListener("ended", function () {
+    currentAudio.addEventListener('ended', function () {
       iconElement.innerHTML = `
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 cursor-pointer text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M5 4v12l10-6-10-6z" />
@@ -249,18 +249,18 @@ function toggleAudio(audioUrl, iconElement) {
 // Save to favorite
 async function toggleFavorite(iconElement, surahNumber, ayahNumber) {
   if (!user) {
-    window.location.href = "/login";
+    window.location.href = '/login';
     return;
   }
 
   try {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem('user'));
     const response = await fetch(
       `http://localhost:3000/surah/favorite/ayah/${surahNumber}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: user?.token,
         },
         body: JSON.stringify({ ayah: ayahNumber }),
@@ -293,10 +293,10 @@ async function toggleFavorite(iconElement, surahNumber, ayahNumber) {
 // Signed as checkpoint
 async function toggleCheckpoint(iconElement, surahNumber, ayahNumber) {
   let checkpoints = {};
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem('user'));
 
   if (!user) {
-    window.location.href = "/login";
+    window.location.href = '/login';
     return;
   }
 
@@ -307,9 +307,9 @@ async function toggleCheckpoint(iconElement, surahNumber, ayahNumber) {
   const response = await fetch(
     `http://localhost:3000/surah/checkpoints/ayah/${surahNumber}`,
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: user?.token,
       },
       body: JSON.stringify({ ayah: ayahNumber }),
@@ -322,7 +322,7 @@ async function toggleCheckpoint(iconElement, surahNumber, ayahNumber) {
   elements.forEach((element) => {
     console.log(element); // Contoh: menampilkan elemen di console
     // Ubah warna outline menjadi abu-abu
-    element.setAttribute("stroke", "grey");
+    element.setAttribute('stroke', 'grey');
   });
 
   iconElement.innerHTML = `
@@ -334,29 +334,29 @@ async function toggleCheckpoint(iconElement, surahNumber, ayahNumber) {
 
 // Get authenticated profile
 async function fetchProfile() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem('user'));
 
   if (!user) {
-    window.location.href = "/login";
+    window.location.href = '/login';
     return;
   }
 
   try {
-    const username = document.getElementById("username");
-    const checkpointInfo = document.getElementById("checkpointInfo");
-    const totalFavAyah = document.getElementById("totalFavAyah");
-    const goToCheckpoint = document.getElementById("goToCheckpoint");
+    const username = document.getElementById('username');
+    const checkpointInfo = document.getElementById('checkpointInfo');
+    const totalFavAyah = document.getElementById('totalFavAyah');
+    const goToCheckpoint = document.getElementById('goToCheckpoint');
 
-    const response = await fetch("http://localhost:3000/me", {
-      method: "GET",
+    const response = await fetch('http://localhost:3000/me', {
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: user?.token,
       },
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch profile data");
+      throw new Error('Failed to fetch profile data');
     }
 
     const data = await response.json();
@@ -370,29 +370,29 @@ async function fetchProfile() {
 
     if (checkpointSurah || checkpointAyah) {
       checkpointInfo.innerHTML = `Surat ${checkpointSurah}, Ayat ${checkpointAyah}`;
-      goToCheckpoint.classList.remove("hidden");
+      goToCheckpoint.classList.remove('hidden');
       goToCheckpoint.href = `/detail-surah?number=${checkpointSurah}&checkpointAyahNumber=${checkpointAyah}`;
     } else {
-      goToCheckpoint.classList.add("hidden");
+      goToCheckpoint.classList.add('hidden');
     }
 
     if (data?.data?.favAyah) {
       totalFavAyah.innerText = data?.data?.favAyah;
     }
   } catch (error) {
-    console.error("Error fetching profile data:", error);
+    console.error('Error fetching profile data:', error);
   }
 }
 
 async function getData() {
-  return Promise.resolve("data");
+  return Promise.resolve('data');
 }
 
 async function getMoreData(data) {
-  return Promise.resolve(data + "more data");
+  return Promise.resolve(data + 'more data');
 }
 
 function logout() {
-  localStorage.removeItem("user");
-  window.location.href = "/login";
+  localStorage.removeItem('user');
+  window.location.href = '/login';
 }

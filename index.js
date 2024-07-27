@@ -154,12 +154,10 @@ app.get('/surah/:nomor', async function (req, res) {
   try {
     const sqlFavorite =
       'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? ';
-
     const [resultsFavorite] = await db.query(sqlFavorite, [user_id, nomor]);
 
     const sqlCheckpoint =
       'SELECT * FROM ayah_checkpoints WHERE user_id = ? and surah_id = ? ';
-
     const [resultsCheckpoints] = await db.query(sqlCheckpoint, [
       user_id,
       nomor,
@@ -240,7 +238,8 @@ app.get('/surah/favorites/list', async function (req, res) {
   const { user_id } = req.user;
 
   try {
-    const sqlFavorite = 'SELECT * FROM surah_favorites WHERE user_id = ?';
+    const sqlFavorite =
+      'SELECT * FROM surah_favorites WHERE user_id = ? ORDER BY id DESC';
 
     const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
 
@@ -398,7 +397,8 @@ app.get('/surah/favorites/ayah/list', async function (req, res) {
   const { user_id } = req.user;
 
   try {
-    const sqlFavorite = 'SELECT * FROM ayah_favorites WHERE user_id = ?';
+    const sqlFavorite =
+      'SELECT * FROM ayah_favorites WHERE user_id = ? ORDER BY id DESC';
 
     const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
 
