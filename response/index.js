@@ -36,7 +36,11 @@ const responseListAyat = (ayat, favorites, checkpoints) => {
 
 const responseListAyatFavorite = (ayat) => {
   return ayat.map((e) => {
-    return JSON.parse(e.ayah_json);
+    const data = {
+      id: e.id,
+    };
+    const detail = JSON.parse(e.ayah_json);
+    return { ...data, ...detail };
   });
 };
 

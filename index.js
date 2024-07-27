@@ -308,7 +308,7 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
 
   try {
     const sqlDetail =
-      'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? and ayah_id = ? LIMIT 1';
+      'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? and ayah_id = ? and (is_priority = 0 or is_priority = null) LIMIT 1';
 
     const [resultsDetail] = await db.query(sqlDetail, [user_id, nomor, ayah]);
 
@@ -334,13 +334,76 @@ app.post('/surah/favorite/ayah/:nomor', async function (req, res) {
         .filter((e) => e.nomorAyat == ayah)[0];
 
       const sqlInsert =
-        'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id, ayah_json) VALUES (?, ?, ?, ?)';
+        'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id, ayah_json, is_priority) VALUES (?, ?, ?, ?, ?)';
 
       await db.query(sqlInsert, [
         user_id,
         nomor,
         ayah,
         JSON.stringify(listAyah),
+        0,
+      ]);
+    }
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+      isAdd,
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.post('/surah/favorite/ayah/priority/:nomor', async function (req, res) {
+  const { nomor } = req.params;
+  const { ayah } = req.body;
+  const { user_id } = req.user;
+
+  try {
+    const sqlDetail =
+      'SELECT * FROM ayah_favorites WHERE user_id = ? and surah_id = ? and ayah_id = ? and is_priority = ? LIMIT 1';
+
+    const [resultsDetail] = await db.query(sqlDetail, [
+      user_id,
+      nomor,
+      ayah,
+      1,
+    ]);
+
+    var isAdd = 1;
+
+    if (resultsDetail.length > 0) {
+      const sqlDelete = 'DELETE FROM ayah_favorites WHERE id = ?';
+
+      await db.query(sqlDelete, [resultsDetail[0].id]);
+      isAdd = 0;
+    } else {
+      const response = await httpAxios.get(`/surat/${nomor}`);
+
+      const body = response?.data;
+
+      const surahParent = body.data;
+
+      const listAyah = surahParent.ayat
+        .map((e) => {
+          e.surah = surahParent.nomor;
+          return e;
+        })
+        .filter((e) => e.nomorAyat == ayah)[0];
+
+      const sqlInsert =
+        'INSERT INTO ayah_favorites (user_id, surah_id, ayah_id, ayah_json,is_priority) VALUES (?, ?, ?, ?, ?)';
+
+      await db.query(sqlInsert, [
+        user_id,
+        nomor,
+        ayah,
+        JSON.stringify(listAyah),
+        1,
       ]);
     }
 
@@ -398,7 +461,7 @@ app.get('/surah/favorites/ayah/list', async function (req, res) {
 
   try {
     const sqlFavorite =
-      'SELECT * FROM ayah_favorites WHERE user_id = ? ORDER BY id DESC';
+      'SELECT * FROM ayah_favorites WHERE user_id = ? AND (is_priority = 0 OR is_priority IS NULL) ORDER BY id DESC';
 
     const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
 
@@ -406,6 +469,49 @@ app.get('/surah/favorites/ayah/list', async function (req, res) {
       code: 200,
       message: 'Success',
       data: responseListAyatFavorite(resultsFavorite),
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.get('/surah/favorites/ayah/priority/list', async function (req, res) {
+  const { user_id } = req.user;
+
+  try {
+    const sqlFavorite =
+      'SELECT * FROM ayah_favorites WHERE user_id = ? AND is_priority = 1 ORDER BY id DESC LIMIT 3';
+
+    const [resultsFavorite] = await db.query(sqlFavorite, [user_id]);
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
+      data: responseListAyatFavorite(resultsFavorite),
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      message: err.message,
+    });
+  }
+});
+
+app.delete('/surah/favorites/ayah/delete/:id', async function (req, res) {
+  const { id } = req.params;
+  const { user_id } = req.user;
+
+  try {
+    const sqlDelete = 'DELETE FROM ayah_favorites WHERE id = ? and user_id = ?';
+
+    await db.query(sqlDelete, [id, user_id]);
+
+    res.status(200).json({
+      code: 200,
+      message: 'Success',
     });
   } catch (err) {
     res.status(500).json({
