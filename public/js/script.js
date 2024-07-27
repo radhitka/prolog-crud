@@ -23,7 +23,7 @@ async function fetchSurahList() {
                     <div class="flex justify-between items-center">
                         <p class="text-lg font-bold mr-5">${surah.number}.</p>
                         <div class="text-gray-700">
-                            <span class="block text-lg font-arabic">${surah.englishName}</span>
+                            <span class="block text-lg font-semibold font-arabic">${surah.englishName}</span>
                             <span class="block text-sm font-semibold">${surah.englishNameTranslation}</span> 
                         </div>
                     </div>
@@ -79,11 +79,11 @@ async function fetchSurahDetails() {
     ayahList.classList.add('divide-y', 'divide-gray-300');
 
     surah.data.ayahs.forEach((ayah) => {
-      console.log({
-        surahNumber: surah.data.number,
-        isCheckpoints: ayah.isCheckpoints,
-        isFavorite: ayah.isFavorite,
-      });
+      // console.log({
+      //   surahNumber: surah.data.number,
+      //   isCheckpoints: ayah.isCheckpoints,
+      //   isFavorite: ayah.isFavorite,
+      // });
 
       ayahList.insertAdjacentHTML(
         'beforeend',
@@ -91,15 +91,18 @@ async function fetchSurahDetails() {
           <li class="py-4" id="nomorAyat-${ayah.nomorAyat}">
               <div class="flex justify-between items-center py-4">
                   <div class="font-bold pr-5">${ayah.nomorAyat}.</div>
-                  <div class="text-3xl text-right font-arabic">${
+                  <div class="text-3xl text-right font-semibold font-arabic">${
                     ayah.teksArab
                   }</div>
               </div>
               <div class="text-sm font-normal">
-                  <p class="mb-2">
+                  <p class="mb-2 font-semibold">
+                      ${ayah.teksLatin}
+                  </p>
+                  <p class="">
                       ${ayah.teksIndonesia}
                   </p>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 mt-5">
                       <span class="play-icon" title="Play audio" onclick="toggleAudio('${
                         ayah.audio['01']
                       }', this)">
@@ -182,7 +185,6 @@ async function fetchFavoriteAyahs() {
     favoriteAyahs = data?.data || [];
 
     // console.log(data);
-    // console.log(favoriteAyahs);
   } catch (error) {
     console.error(error);
   } finally {
@@ -196,6 +198,7 @@ async function fetchFavoriteAyahs() {
     favoriteList.classList.add('divide-y', 'divide-gray-300');
 
     favoriteAyahs.forEach((ayah) => {
+      console.log(ayah);
       favoriteList.insertAdjacentHTML(
         'beforeend',
         `
@@ -204,8 +207,19 @@ async function fetchFavoriteAyahs() {
                   <div class="font-bold pr-5">${ayah.surah}:${ayah.nomorAyat}</div>
                   <div class="text-4xl text-right font-arabic">${ayah.teksArab}</div>
               </div>
+              <div class="text-sm font-semibold mt-2 mb-2">
+                  ${ayah.teksLatin}
+              </div>
               <div class="text-sm font-normal">
                   ${ayah.teksIndonesia}
+              </div>
+              <div class="flex items-center mt-4 mb-4 gap-2">
+                <svg class="h-6 w-6 cursor-pointer" onclick="pinFavoriteAyah('${ayah.surah}', '${ayah.nomorAyat}');" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" viewBox="0 0 297 297" xml:space="preserve">
+                  <path d="M234.067,85.715C234.067,38.451,195.682,0,148.5,0S62.933,38.451,62.933,85.715c0,34.744,20.755,64.703,50.486,78.15  l24.91,124.794c0.968,4.851,5.225,8.342,10.171,8.342c4.944,0,9.203-3.492,10.171-8.341l24.911-124.795  C213.313,150.417,234.067,120.459,234.067,85.715z M148.5,233.643l-12.605-63.149c4.115,0.611,8.323,0.938,12.605,0.938  s8.49-0.326,12.605-0.938L148.5,233.643z M148.5,150.686c-35.744,0-64.823-29.146-64.823-64.972s29.079-64.972,64.823-64.972  s64.823,29.146,64.823,64.972S184.244,150.686,148.5,150.686z"/>
+                </svg>  
+                <span class="text-sm hover:underline text-red-500 cursor-pointer" onclick="deleteFavoriteAyah('${ayah.id}');">
+                  Hapus dari favorit
+                </span>
               </div>
           </li>
       `
@@ -213,6 +227,146 @@ async function fetchFavoriteAyahs() {
     });
 
     favoriteListContainer.appendChild(favoriteList);
+  }
+}
+
+// Load top favorite ayahs
+async function fetchTopFavoriteAyahs() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const topFavoriteListContainer = document.getElementById('favorite-list-top');
+  let topFavoriteAyahs = [];
+
+  try {
+    const response = await fetch(
+      'http://localhost:3000/surah/favorites/ayah/priority/list',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: user?.token,
+        },
+      }
+    );
+
+    const data = await response.json();
+    topFavoriteAyahs = data?.data || [];
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    if (topFavoriteAyahs.length === 0) {
+      topFavoriteListContainer.innerHTML =
+        '<p class="text-center font-semibold text-gray-700">Tidak ada ayat favorit yang disimpan.</p>';
+      return;
+    }
+
+    const favoriteList = document.createElement('ul');
+    favoriteList.classList.add('divide-y', 'divide-gray-300');
+
+    topFavoriteAyahs.forEach((ayah) => {
+      favoriteList.insertAdjacentHTML(
+        'beforeend',
+        `
+          <li class="py-4">
+              <div class="flex justify-between items-center py-4">
+                  <div class="font-bold pr-5">${ayah.surah}:${ayah.nomorAyat}</div>
+                  <div class="text-4xl text-right font-arabic">${ayah.teksArab}</div>
+              </div>
+              <div class="text-sm font-semibold mt-2 mb-2">
+                  ${ayah.teksLatin}
+              </div>
+              <div class="text-sm font-normal">
+                  ${ayah.teksIndonesia}
+              </div>
+              <div class="flex items-center mt-4 mb-4 gap-2">
+                  <svg class="h-6 w-6 cursor-pointer" onclick="pinFavoriteAyah('${ayah.surah}', '${ayah.nomorAyat}');" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" viewBox="0 0 297 297" xml:space="preserve">
+                    <path d="M234.067,85.715C234.067,38.451,195.682,0,148.5,0S62.933,38.451,62.933,85.715c0,34.744,20.755,64.703,50.486,78.15  l24.91,124.794c0.968,4.851,5.225,8.342,10.171,8.342c4.944,0,9.203-3.492,10.171-8.341l24.911-124.795  C213.313,150.417,234.067,120.459,234.067,85.715z M148.5,233.643l-12.605-63.149c4.115,0.611,8.323,0.938,12.605,0.938  s8.49-0.326,12.605-0.938L148.5,233.643z M148.5,150.686c-35.744,0-64.823-29.146-64.823-64.972s29.079-64.972,64.823-64.972  s64.823,29.146,64.823,64.972S184.244,150.686,148.5,150.686z"/>
+                  </svg>  
+                <a href="#" class="" onclick="deleteFavoriteAyah('${ayah.id}');">
+                  <span class="text-sm hover:underline text-red-500">Hapus dari favorit</span>
+                <a/>
+              </div>
+          </li>
+      `
+      );
+    });
+
+    topFavoriteListContainer.appendChild(favoriteList);
+  }
+}
+
+// Save to favorite
+async function deleteFavoriteAyah(ayahNumber) {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) {
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:3000/surah/favorites/ayah/delete/${ayahNumber}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: user?.token,
+        },
+      }
+    );
+
+    // const data = await response.json();
+    // console.log(data);
+
+    if (response.ok) {
+      document.getElementById('favorite-list').innerHTML = ''
+      document.getElementById('favorite-list-top').innerHTML = ''
+    }else{
+      console.log(response.error);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await fetchFavoriteAyahs()
+    await fetchTopFavoriteAyahs()
+  }
+}
+
+// Pin favorite
+async function pinFavoriteAyah(surahNumber, ayahNumber) {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) {
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const response = await fetch(  
+      `http://localhost:3000/surah/favorite/ayah/priority/${surahNumber}`,
+      {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: user?.token,
+          },
+          body: JSON.stringify({ ayah: ayahNumber }), 
+      }
+    );
+
+    if (response.ok) {
+      document.getElementById('favorite-list').innerHTML = ''
+      document.getElementById('favorite-list-top').innerHTML = ''
+    }else{
+      console.log(response.error);
+    }
+
+    // const data = await response.json();
+    // console.log(data);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await fetchFavoriteAyahs()
+    await fetchTopFavoriteAyahs()
   }
 }
 
